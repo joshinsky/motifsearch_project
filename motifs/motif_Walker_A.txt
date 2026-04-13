@@ -1,0 +1,6 @@
+G 	10
+* 	4
+G 	10
+K 	10
+# either serine or threonine
+TS 	10

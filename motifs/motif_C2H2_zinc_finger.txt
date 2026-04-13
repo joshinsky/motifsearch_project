@@ -1,0 +1,11 @@
+# C2H2 Zinc Finger core
+C	10
+# short loop
+*	2-4
+C	10
+# zinc finger structural loop
+*	12
+H	10
+# short loop
+*	3-5
+H	10
