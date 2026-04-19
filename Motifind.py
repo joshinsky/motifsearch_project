@@ -85,6 +85,7 @@ def MotifRead(filename):
                 if not line or line.startswith('#'): 
                     continue
 
+
                 parts = line.split('\t')
                 if len(parts) < 2:
                     raise IndexError(f"Missing penalty column:\nexpected:\t[letter, penalty]\ngiven:\t{line}")
@@ -109,9 +110,52 @@ def MotifRead(filename):
 # MotifTracker
 ######
 
+def MotifTracker(sequences, headers, motif, penalties, max_penalty):
+    # List to store motif matches
+    matches = []
+    
+    # Length of the motif we are searching for
+    motif_len = len(motif)
 
+    # Loop through each sequence in the fasta file
+    for seq_idx, seq in enumerate(sequences):
 
+        # Slide a window of motif length across the sequence
+        for start in range(len(seq) - motif_len + 1):
+            # Reset penalty counter for this starting position
+            tot_penalty = 0
 
+            mismatch = False
+
+            # Compare motif to sequence character by character
+            for i in range(motif_len):
+                # Character from sequence at current position
+                seq_char = seq[start + i]
+
+                # Expected motif character at this position
+                motif_char = motif[i]
+
+                # If characters do not match add penalty
+                if seq_char != motif_char:
+                    tot_penalty += penalties[i]
+
+                    # Stop checking this position if penalty exceeds limit
+                    if tot_penalty > max_penalty:
+                        mismatch = True
+                        break
+  
+            # If we did not exceed penalty threshold, record the match
+            if not mismatch:
+                matches.append(
+                    (
+                        headers[seq_idx],       # Sequence identifier
+                        start,                  # Start position of the match
+                        start + motif_len - 1,  # End position of match
+                        tot_penalty             # Total penalty score
+                    )
+            )
+
+    return matches
 
 ######
 # Run Program
