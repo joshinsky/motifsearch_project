@@ -184,7 +184,7 @@ if __name__ == "__main__":
 
     # extract fasta
     headers, sequences = FastaRead(fasta_name)
-    print(f"{len(headers)} fasta entries successfully extracted from {fasta_name}")
+    print(f"\n{len(headers)} fasta entries successfully extracted from {fasta_name}")
     
     # extract motif
     motif = MotifRead(motif_name)
@@ -207,82 +207,120 @@ if __name__ == "__main__":
             for match in matches:
                 stop_idx = match[0]
                 final_penalty = match[1]
-                all_matches[head].append((start_idx, stop_idx, final_penalty))
+                if max_penalty != 0:
+                    confidence_score = 1 - final_penalty/max_penalty
+                else:
+                    confidence_score = 1
+                all_matches[head].append((start_idx, stop_idx, float(f"{confidence_score:.2f}")))
+
+        if all_matches[head] == []:
+            all_matches[head] = ["NO MATCHES FOUND."]
 
     # finish up
     user_prompt1 = f"""
-    \nProgram finished!
-    \nFound one or more matches for {len(all_matches)} entries!
-    \nHow would you like to proceed?
-    """ 
+    \nProgram finished for {len(all_matches)} entries!
+    How would you like to proceed?""" 
     
     user_prompt2 = """
-    \nPlease select by typing one of the below numbers in the interface:
-    \n1 --> save matches to disk
-    \n2 --> output matches without saving
-    \n3 --> output matches and save to disk
-    \n4 --> stop program without saving matches
+    Please select by typing one of the below numbers in the interface:
+    1 --> save all results to disk
+    2 --> save only matches to disk
+    3 --> output all results without saving
+    4 --> output only matches without saving
+    5 --> output all results and also save to disk
+    6 --> output only matches and also save to disk
+    7 --> stop program without saving anything\n
     """
-    allowed_answers = {'1', '2', '3', '4', '42'}
+
+    allowed_answers = {'1', '2', '3', '4', '5', '6', '7', '42'}
     user_answer = '0'
 
     print(user_prompt1)
     while user_answer not in allowed_answers:
         user_answer = input(user_prompt2)
 
-        if user_answer in {'1', '3'}:
-            output_filename = input("Type the desired name for the file here (without file-suffix):")
-            with open(f"{output_filename}.tsv", 'w') as outfile:
-                for head, matchlist in all_matches.items():
-                    print(head, file=outfile)
-                    for match in matchlist:
-                        print(match, file=outfile)
-        
-        if user_answer in {'2', '3'}:
-            for head, matchlist in all_matches.items():
-                print(head)
-                for match in matchlist:
-                    print(match)
+        if user_answer not in allowed_answers:
+            print("\nInvalid user-input. How would you like to proceed?")
+            continue
 
-        if user_answer == '4':
-            print("\nWell, okay then...\nThanks for wasting both your and my time, I guess...")
+        if user_answer in {'3', '4', '5', '6'}:
+            for head, matchlist in all_matches.items():
+
+                # if selected by user, skip entries without matches
+                if user_answer in {'4', '6'} and matchlist[0] == "NO MATCHES FOUND.":
+                    continue
+
+                print(head)
+                for entry in matchlist:
+                    entry = str(entry).lstrip('(').rstrip(')')
+                    text = '\t'.join(entry.split(', '))
+                    print(text)
+
+        if user_answer in {'1', '2', '5', '6'}:
+            output_path = input("\nType the desired path for the file here:")
+            try:
+                with open(output_path, 'w') as outfile:
+                    for head, matchlist in all_matches.items():
+                    
+                        # if selected by user, skip entries without matches
+                        if user_answer in {'2', '6'} and matchlist[0] == "NO MATCHES FOUND.":
+                            continue
+
+                        # save entry in file
+                        print(head, file=outfile)
+                        for entry in matchlist:
+                            entry = str(entry).lstrip('(').rstrip(')')
+                            text = '\t'.join(entry.split(', '))
+                            print(text, file=outfile)
+            
+                print(f"\nSaved all matches in {output_path}\n")
+
+            except FileNotFoundError:
+                raise FileNotFoundError("Please make sure the parent- and sub-directories exist")
+
+
+        
+
+        if user_answer == '7':
+            print("\nWell, okay then...\nThanks for wasting both your and my time, I guess...\n")
 
         if user_answer == '42':
             print("""
                 \nCongrats! You found the hidden easter egg in this program!
-                \nGood job!
-                \nNow that you've made it here, you don't need to know all matches in 
-                \nyour fasta files anymore! I will not print them for you.
-                \nYou know the answer to life, the universe and all that lies beyond 
-                \nanyway, otherwise you wouldn't have chosen this number.
-                \nSo, why are you still here bothering yourself with these problems?
-                \nFASTA files... sequence matches... recursive algorithms...
-                \nIt all becomes so small if you sometimes just take a step back and
-                \nreflect on life and its beauty.
-                \nDo you really want to sit in this dark closed room with little to no
-                \noxygen in front of a screen that will be bad for your eyesight and 
-                \nyour posture? Chances are that the weather is quite nice outside.
-                \nIf you think about it carefully, outside is where you really want
-                \nto be right now. Isn't it?
-                \nI know we all have a mission - a cause that we dedicate ourselves to.
-                \nFind motifs, find mutations, cure diseases, save the world...
-                \nBut who is there to save you today from the dullness of the day?
-                \nThe answer is... 42 (of course), but that only means that it's in
-                \nyour own power to take a step back, carefully reach out with your
-                \nhand of preference, either close the laptop or switch off the PC, 
-                \ntake another step back, try out a smile, feel these rarely-used 
-                \nmuscles stretch your face, look towards the door, and materialise
-                \nthe thought of fresh air in your lungs, the feeling of warm sunshine
-                \non your skin, and the happiness and relaxedness flooding your whole
-                \nbody slowly. 
-                \nIf this thought develops its own power, don't resist, but give in.
-                \nStep towards the door, open it and step outside, leave the building,
-                \ngo for a walk, hear the birds sing.
-                \nTake a break. You deserve it. Give it to yourself as a present.
-                \n
-                \nBut in case it's a rainy day, you can feel free to continue working.
+Good job!
+Now that you've made it here, you don't need to know all matches in 
+your fasta files anymore! I will not print them for you.
+You know the answer to life, the universe and all that lies beyond 
+anyway, otherwise you wouldn't have chosen that number.
+So, why are you still here bothering yourself with these problems?
+FASTA files... sequence matches... recursive algorithms...
+It all becomes so small if you sometimes just take a step back and
+reflect on life and its beauty.
+Do you really want to sit in this dark closed room with little to no
+oxygen in front of a screen that will be bad for your eyesight and 
+your posture? Chances are that the weather is quite nice outside.
+If you think about it carefully, outside is where you really want
+to be right now. Isn't it?
+I know we all have a mission - a cause that we dedicate ourselves to.
+Find motifs, find mutations, cure diseases, save the world...
+But who is there to save you today from the dullness of the day?
+The answer is... 42 (of course), but that only means that it's in
+your own power to take a step back, carefully reach out with your
+hand of preference, either close the laptop or switch off the PC, 
+take another step back, try out a smile, feel these rarely-used 
+muscles stretch your face, look towards the door, and materialise
+the thought of fresh air in your lungs, the feeling of warm sunshine
+on your skin, and the happiness and relaxedness flooding your whole
+body slowly. 
+If this thought develops its own power, don't resist, but give in.
+Step towards the door, open it and walk outside, leave the building,
+go for a walk, hear the birds sing.
+Take a break. 
+You deserve it. 
+Give it to yourself as a present.
+                
+But in case it's a rainy day, feel free to continue working of course.
                 """)
-            sys.exit(0)
 
 
 
