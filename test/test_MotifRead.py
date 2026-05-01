@@ -6,7 +6,6 @@ from pathlib import Path
 #sys.path.append(os.path.join(os.path.dirname(__file__), "../src"))
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
 
-
 from Motifind import MotiFind
 
 TESTDATA = Path(__file__).resolve().parents[1] / "testdata"
@@ -43,7 +42,7 @@ TESTDATA = Path(__file__).resolve().parents[1] / "testdata"
 
 def test_MotifRead(filename, expectation):
 
-	mf = MotiFind(fasta_name="", motif_name="", max_penalty=0)
+	mf = MotiFind(fasta_name=None, motif_name=None, max_penalty=0)
 
 	# case 1: we expect an error
 	if isinstance(expectation, type) and issubclass(expectation, Exception):
