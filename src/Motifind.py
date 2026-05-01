@@ -375,13 +375,14 @@ But in case it's a rainy day, feel free to continue working of course.
 
                 rainy_day = input(f"\nIs it a rainy day? (y/n)")
                 if rainy_day.lower() == 'y':
+                    print("\nOkay then! Back to work!")
                     user_answer = None
                     continue
                 elif rainy_day.lower() == 'n':
-                    print(f"That's great to hear! Enjoy the day!")
+                    print(f"\nThat's great to hear! Enjoy the day!")
                     sys.exit(1)
                 else:
-                    print(f"I don't understand that answer. That must mean you're very overworked and should take a break!")
+                    print(f"\nI don't understand that answer. That must mean you're very overworked and should take a break!")
                     sys.exit(1)
 
 
