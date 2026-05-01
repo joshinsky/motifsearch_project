@@ -5,7 +5,6 @@ from Motifind import MotiFind
 
 if __name__ == "__main__":
 
-
 	# get user input
 	try:
 		fasta_filename = sys.argv[1]
