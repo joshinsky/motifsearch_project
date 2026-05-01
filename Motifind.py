@@ -131,6 +131,9 @@ def MotifRead(filename):
                     except ValueError:
                         raise ValueError(f"Error: penalties should be given as numbers.\nYour input '{penalty}' is non-numerical.")
 
+                    if penalty < 0:
+                        raise ValueError(f"Error: penalties should not be negative numbers. {penalty} is negative.")
+
                     motif_entry = (entry_type, motif_chars, penalty)
                 
                 motif.append(motif_entry)
