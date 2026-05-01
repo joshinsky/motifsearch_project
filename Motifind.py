@@ -19,6 +19,7 @@ def usage(msg=None):
 
 # Reads a fasta file and returns two lists: headers and sequences
 def FastaRead(filename):
+
     # Check if the file exists
     if not os.path.exists(filename):
         raise FileNotFoundError(f"The file {filename} does not exist.")
@@ -30,7 +31,7 @@ def FastaRead(filename):
     try:
         with open(filename, 'r') as f:
             for line in f:
-                line = line.strip()   # Remove whitespace/newlines
+                line = line.strip()     # Remove whitespace/newlines
 
                 # Skip empty lines
                 if not line: 
@@ -78,16 +79,17 @@ def MotifRead(filename):
 
     try:
         with open(filename, 'r') as f:
-            for line in f:
-                line = line.strip()   # Remove whitespace/newlines
+            for i, line in enumerate(f):
+                line = line.strip()     # Remove whitespace/newlines
 
                 # Skip empty lines and comments
                 if not line or line.startswith('#'): 
                     continue
 
+                # extract columns of the .tsv
                 parts = line.split('\t')
                 if len(parts) < 2:
-                    raise IndexError(f"Missing second column:\nexpected:\t[letter, penalty]\ngiven:\t{line}")
+                    raise IndexError(f"Error in line {i} of {filename}: Missing second column:\nexpected:\t[letter, penalty]\ngiven:\t{line}")
 
                 # Gap case
                 if parts[0] == '*':
@@ -100,23 +102,24 @@ def MotifRead(filename):
                         gap_bounds = parts[1].split('-')
 
                         if len(gap_bounds) != 2:
-                            raise ValueError(f"Error: gap must be in format 'min-max'. Got: {parts[1]}")
+                            raise ValueError(f"Error in line {i} of {filename}: gap must be in format 'min-max'. Got: {parts[1]}")
 
+                        # convert bounds to int
                         try:
                             lower_bound = int(gap_bounds[0])
                             upper_bound = int(gap_bounds[1])
                         except ValueError:
-                            raise ValueError(f"Error: gap bounds should be given as integers.\n{gap_bounds} was given which are not integers.")
+                            raise ValueError(f"Error in line {i} of {filename}: gap bounds should be given as integers.\n{gap_bounds} was given which are not integers.")
 
                         if lower_bound > upper_bound:
-                            raise ValueError(f"Error: lower bound > upper bound in gap: {parts[1]}")
+                            raise ValueError(f"Error in line {i} of {filename}: lower bound should not be > upper bound in gap: {parts[1]}")
     
-                    # Single value case
+                    # case: gap spans only one single value
                     else:
                         try:
                             lower_bound = upper_bound = int(parts[1])
                         except ValueError:
-                            raise ValueError(f"Error: gap value must be an integer. Got: {parts[1]}")
+                            raise ValueError(f"Error in line {i} of {filename}: gap value must be an integer. Got: {parts[1]}")
 
                     motif_entry = (entry_type, lower_bound, upper_bound)
                     
@@ -126,13 +129,14 @@ def MotifRead(filename):
                     motif_chars = set(parts[0])
                     penalty = parts[1]
 
+                    # convert penalty to float
                     try:
                         penalty = float(penalty)
                     except ValueError:
-                        raise ValueError(f"Error: penalties should be given as numbers.\nYour input '{penalty}' is non-numerical.")
+                        raise ValueError(f"Error in line {i} of {filename}: penalties should be given as numbers.\nYour input '{penalty}' is non-numerical.")
 
                     if penalty < 0:
-                        raise ValueError(f"Error: penalties should not be negative numbers. {penalty} is negative.")
+                        raise ValueError(f"Error in line {i} of {filename}: penalties should not be negative numbers. {penalty} is negative.")
 
                     motif_entry = (entry_type, motif_chars, penalty)
                 
@@ -152,39 +156,50 @@ def MotifRead(filename):
 
 def MatchFinder(seq, current_seq_idx, motif, current_motif_idx, accum_penalty, max_penalty):
 
+    # case: we exceded the end of the seq without a match
     if current_seq_idx > len(seq):
         matchlist = []
         return matchlist
 
+    # case: we reached the end of the motif without crossing the max_penalty threshold --> match!
     if current_motif_idx >= len(motif):
         matchlist = [[current_seq_idx, accum_penalty]]
         return matchlist
 
+    # case: we reached the end of the motif without a match
     if current_seq_idx == len(seq):
         matchlist = []
         return matchlist
 
+    # case: our next motif element is a defined character
     if motif[current_motif_idx][0] == 'char':
         seq_char = seq[current_seq_idx]
         motif_chars = motif[current_motif_idx][1]
         mismatch_penalty = motif[current_motif_idx][2]
 
+        # in a mismatch, increase the total penalty
         if seq_char not in motif_chars:
             accum_penalty += mismatch_penalty
+
+            # if our maximum penalty was exceded, we return "no match"
             if accum_penalty > max_penalty:
                 matchlist = []
                 return matchlist
 
+        # recursive function call on the next motif and sequence position
         current_seq_idx += 1
         current_motif_idx += 1  
         return MatchFinder(seq, current_seq_idx, motif, current_motif_idx, accum_penalty, max_penalty)
 
+    # case: our next motif elements can be any character
     elif motif[current_motif_idx][0] == 'gap':
         min_gap_len = motif[current_motif_idx][1]
         max_gap_len = motif[current_motif_idx][2] + 1
         
         current_motif_idx += 1
         gap_matches = []
+
+        # recursively try out all different gap scenarios and collect any occuring matches
         for i in range(min_gap_len, max_gap_len):
             gap_accum_penalty = accum_penalty
             gap_seq_idx = current_seq_idx+i
@@ -218,19 +233,21 @@ if __name__ == "__main__":
     print(f"The motif provided in {motif_name} has a minimum length of {len(motif)}.")
     print(f"So, let's get started with a maximum mismatch score of {max_penalty}!")
 
-    # find matches
+    # check out all given fasta entries, one after another
     all_matches = {}
     for i in range(len(sequences)):
         seq = sequences[i]
         head = headers[i]
         all_matches[head] = []
         
+        # loop over all possible sequence start indeces and search for motif matches
         start_idx = 0
         for start_idx in range(len(seq)):
             motif_idx = 0
             start_penalty = 0
             matches = MatchFinder(seq, start_idx, motif, motif_idx, start_penalty, max_penalty)
         
+            # store any matches found in a dict {head: [(startidx1, stopidx1, confidence1), (startidx2, stopidx2, confidence2), ...]}
             for match in matches:
                 stop_idx = match[0]
                 final_penalty = match[1]
@@ -240,6 +257,7 @@ if __name__ == "__main__":
                     confidence_score = 1
                 all_matches[head].append((start_idx, stop_idx, float(f"{confidence_score:.2f}")))
 
+        # take note of each entry that didn't yield matches
         if all_matches[head] == []:
             all_matches[head] = ["NO MATCHES FOUND."]
 
@@ -260,8 +278,9 @@ if __name__ == "__main__":
     """
 
     allowed_answers = {'1', '2', '3', '4', '5', '6', '7', '42'}
-    user_answer = '0'
+    user_answer = None
 
+    # keep asking the user how to proceed until they give a valid answer
     print(user_prompt1)
     while user_answer not in allowed_answers:
         user_answer = input(user_prompt2)
@@ -270,6 +289,7 @@ if __name__ == "__main__":
             print("\nInvalid user-input. How would you like to proceed?")
             continue
 
+        # case: user wants to print the output on screen
         if user_answer in {'3', '4', '5', '6'}:
             for head, matchlist in all_matches.items():
 
@@ -277,12 +297,14 @@ if __name__ == "__main__":
                 if user_answer in {'4', '6'} and matchlist[0] == "NO MATCHES FOUND.":
                     continue
 
+                # output entry separated by tabs
                 print(head)
                 for entry in matchlist:
                     entry = str(entry).lstrip('(').rstrip(')')
                     text = '\t'.join(entry.split(', '))
                     print(text)
 
+        # case: user wants to store the ouput on disk
         if user_answer in {'1', '2', '5', '6'}:
             output_path = input("\nType the desired path for the file here:")
             try:
@@ -293,7 +315,7 @@ if __name__ == "__main__":
                         if user_answer in {'2', '6'} and matchlist[0] == "NO MATCHES FOUND.":
                             continue
 
-                        # save entry in file
+                        # save tab-separated entry in file
                         print(head, file=outfile)
                         for entry in matchlist:
                             entry = str(entry).lstrip('(').rstrip(')')
@@ -307,10 +329,11 @@ if __name__ == "__main__":
 
 
         
-
+        # case: user doesn't want to do anything
         if user_answer == '7':
             print("\nWell, okay then...\nThanks for wasting both your and my time, I guess...\n")
 
+        # case: user finds the easter egg
         if user_answer == '42':
             print("""
                 \nCongrats! You found the hidden easter egg in this program!
@@ -348,6 +371,22 @@ Give it to yourself as a present.
                 
 But in case it's a rainy day, feel free to continue working of course.
                 """)
+
+            rainy_day = input(f"\nIs it a rainy day? (y/n)")
+            try: 
+                if rainy_day.lower() == 'y':
+                    user_answer = None
+                    continue
+                elif rainy_day.lower() == 'n':
+                    print(f"That's great to hear! Enjoy the day!")
+                    sys.exit(1)
+                else:
+                    print(f"I don't understand that answer. That must mean you're very overworked and should take a break!")
+                    sys.exit(1)
+            except TypeError:
+                print(f"I don't understand that answer. That must mean you're very overworked and should take a break!")
+                sys.exit(1)
+
 
 
 
