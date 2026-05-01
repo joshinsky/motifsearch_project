@@ -1,0 +1,13 @@
+# shine dalgarno motif
+A	8
+G	8
+G	8
+A	
+G	8
+G	8
+# free section
+*	5-10
+# start codon
+A	8
+T	8
+G	8

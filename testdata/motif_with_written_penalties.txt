@@ -1,0 +1,12 @@
+# -35 element
+T	seven
+T	eight
+G	six
+A	five
+*	three
+T	eight
+A	seven
+T	six
+A	five
+AT	four
+T	three

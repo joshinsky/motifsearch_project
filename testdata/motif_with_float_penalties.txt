@@ -1,0 +1,13 @@
+# -35 element
+T	7.4
+T	8.1
+G	6.2
+A	5.0
+C	5.6
+A	5.7
+# intervening unimportant bases
+*	15-21
+# -10 element
+T	8.2
+A	8.0
+T	6.0
