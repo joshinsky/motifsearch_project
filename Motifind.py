@@ -42,7 +42,7 @@ def FastaRead(filename):
                     if current_seq:
                         sequences.append("".join(current_seq))
                         current_seq = []
-                    headers.append(line)
+                    headers.append(line[1:])   # Exclude '>' from headers
 
                 else:
                     # Append sequence line to fragments list
@@ -89,24 +89,48 @@ def MotifRead(filename):
                 if len(parts) < 2:
                     raise IndexError(f"Missing second column:\nexpected:\t[letter, penalty]\ngiven:\t{line}")
 
+                # Gap case
                 if parts[0] == '*':
                     entry_type = 'gap'
-                    gap_bounds = parts[1].split('-')
-                    try:
-                        lower_bound = int(gap_bounds[0])
-                        upper_bound = int(gap_bounds[1])
-                    except ValueError:
-                        raise ValueError(f"Error: gap bounds should be given as integers.\n{gap_bounds} was given which are not integers.")    
+
+                    # Allow both '-' and '_' as separators
+                    parts[1] = parts[1].replace('_', '-')
+
+                    if '-' in parts[1]:
+                        gap_bounds = parts[1].split('-')
+
+                        if len(gap_bounds) != 2:
+                            raise ValueError(f"Error: gap must be in format 'min-max'. Got: {parts[1]}")
+
+                        try:
+                            lower_bound = int(gap_bounds[0])
+                            upper_bound = int(gap_bounds[1])
+                        except ValueError:
+                            raise ValueError(f"Error: gap bounds should be given as integers.\n{gap_bounds} was given which are not integers.")
+
+                        if lower_bound > upper_bound:
+                            raise ValueError(f"Error: lower bound > upper bound in gap: {parts[1]}")
+    
+                    # Single value case
+                    else:
+                        try:
+                            lower_bound = upper_bound = int(parts[1])
+                        except ValueError:
+                            raise ValueError(f"Error: gap value must be an integer. Got: {parts[1]}")
+
                     motif_entry = (entry_type, lower_bound, upper_bound)
                     
+                # Character case
                 else:
                     entry_type = 'char'
                     motif_chars = set(parts[0])
                     penalty = parts[1]
+
                     try:
                         penalty = float(penalty)
                     except ValueError:
                         raise ValueError(f"Error: penalties should be given as numbers.\nYour input '{penalty}' is non-numerical.")
+
                     motif_entry = (entry_type, motif_chars, penalty)
                 
                 motif.append(motif_entry)
