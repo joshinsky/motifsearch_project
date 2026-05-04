@@ -235,6 +235,69 @@ class MotiFind:
             return gap_matches
 
 
+    ###################
+    ## Sequence Scan ##
+    ###################
+
+    def ScanSeqForMotif(self, chosen_idx:int = None, input_sequence:str = None, head:str = None):
+
+        # Enable inputting a sequence or an index
+        if input_sequence is not None and chosen_idx is not None:
+            raise ValueError("Provide either input_sequence or chosen_idx, not both.")
+
+        if input_sequence is None and chosen_idx is None:
+            raise ValueError("You must provide either input_sequence or chosen_idx")
+
+        if input_sequence is not None:
+            if not isinstance(input_sequence, str):
+                raise TypeError("input_sequence must be a string")
+
+            seq = input_sequence
+            head = head or "input_sequence"
+
+        else:
+            if not isinstance(chosen_idx, int):
+                raise TypeError("chosen_idx must be an integer")
+
+            try:
+                seq = self.sequences[chosen_idx]
+                head = self.headers[chosen_idx]
+
+            except IndexError:
+                raise IndexError("chosen_idx is out of range.")
+
+        self.all_matches[head] = []
+
+        # loop over all possible sequence start indeces and search for motif matches
+        start_idx = 0
+        for start_idx in range(len(seq)):
+            motif_idx = 0
+            start_penalty = 0
+            matches = self.MatchFinder(seq, start_idx, motif_idx, start_penalty)
+
+            # store any matches found in a dict {head: [(startidx1, stopidx1, confidence1), ...]}
+            for match in matches:
+                stop_idx = match[0]
+                final_penalty = match[1]
+                if self.max_penalty != 0:
+                    confidence_score = 1 - final_penalty/self.max_penalty
+                else:
+                    confidence_score = 1
+                self.all_matches[head].append((start_idx, stop_idx, float(f"{confidence_score:.2f}")))
+
+        # take note of each entry that didn't yield matches
+        if not self.all_matches[head]:
+            self.all_matches[head] = ["NO MATCHES FOUND."]
+
+    def ScanFastaForMotif(self):
+
+        # check out all given fasta entries, one after another
+        for i in range(len(self.sequences)):
+            self.ScanSeqForMotif(i)
+
+        return self.all_matches
+
+
     ############################
     ## Save or Return Matches ##
     ############################
@@ -372,43 +435,3 @@ class MotiFind:
                     sys.exit(1)
 
             print(user_prompt3)
-
-
-    ###################
-    ## Sequence Scan ##
-    ###################
-
-    def ScanSeqForMotif(self, chosen_idx:int):
-
-        seq = self.sequences[chosen_idx]
-        head = self.headers[chosen_idx]
-        self.all_matches[head] = []
-
-        # loop over all possible sequence start indeces and search for motif matches
-        start_idx = 0
-        for start_idx in range(len(seq)):
-            motif_idx = 0
-            start_penalty = 0
-            matches = self.MatchFinder(seq, start_idx, motif_idx, start_penalty)
-
-            # store any matches found in a dict {head: [(startidx1, stopidx1, confidence1), ...]}
-            for match in matches:
-                stop_idx = match[0]
-                final_penalty = match[1]
-                if self.max_penalty != 0:
-                    confidence_score = 1 - final_penalty/self.max_penalty
-                else:
-                    confidence_score = 1
-                self.all_matches[head].append((start_idx, stop_idx, float(f"{confidence_score:.2f}")))
-
-        # take note of each entry that didn't yield matches
-        if self.all_matches[head] == []:
-            self.all_matches[head] = ["NO MATCHES FOUND."]
-
-    def ScanFastaForMotif(self):
-
-        # check out all given fasta entries, one after another
-        for i in range(len(self.sequences)):
-            self.ScanSeqForMotif(i)
-
-        return self.all_matches
