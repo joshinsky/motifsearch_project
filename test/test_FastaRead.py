@@ -2,87 +2,96 @@ import pytest
 import sys
 import os
 
+# Ensure the src directory is available for imports
 sys.path.append(os.path.join(os.path.dirname(__file__), "../src"))
 
-from Motifind import Motifind
+from Motifind import MotiFind
+
+# Build absolute paths to test data files relative to this test file
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+DATA_DIR = os.path.join(BASE_DIR, "testdata")
+
+def get_path(filename):
+    return os.path.join(DATA_DIR, filename)
 
 
 def test_fasta_basic():
-    moti = Motifind()
-    path = "testdata/fasta_basic.fsa"
+    # Verify that a normal FASTA file is parsed correctly
+    moti = MotiFind(None, None, None)
 
-    headers, sequences = moti.FastaRead(path)
+    headers, sequences = moti.FastaRead(get_path("fasta_basic.fsa"))
 
     assert len(headers) == len(sequences)
     assert len(headers) > 0
 
 
 def test_fasta_empty():
-    moti = Motifind()
-    path = "testdata/fasta_empty.fsa"
+    # Verify that an empty FASTA file returns empty lists
+    moti = MotiFind(None, None, None)
 
-    headers, sequences = moti.FastaRead(path)
+    headers, sequences = moti.FastaRead(get_path("fasta_empty.fsa"))
 
     assert headers == []
     assert sequences == []
 
 
 def test_fasta_no_seq():
-    moti = Motifind()
-    path = "testdata/fasta_no_seq.fsa"
+    # Verify that missing sequences raises an error
+    moti = MotiFind(None, None, None)
 
     with pytest.raises(ValueError):
-        moti.FastaRead(path)
+        moti.FastaRead(get_path("fasta_no_seq.fsa"))
 
 
 def test_fasta_no_headers():
-    moti = Motifind()
-    path = "testdata/fasta_no_headers.fsa"
+    # Verify that missing headers raises an error
+    moti = MotiFind(None, None, None)
 
     with pytest.raises(ValueError):
-        moti.FastaRead(path)
+        moti.FastaRead(get_path("fasta_no_headers.fsa"))
 
 
 def test_fasta_spaces():
-    moti = Motifind()
-    path = "testdata/fasta_spaces.fsa"
+    # Verify that sequences with spaces or formatting are handled correctly
+    moti = MotiFind(None, None, None)
 
-    headers, sequences = moti.FastaRead(path)
+    headers, sequences = moti.FastaRead(get_path("fasta_spaces.fsa"))
 
     assert len(headers) == len(sequences)
     assert all(isinstance(seq, str) for seq in sequences)
 
 
 def test_fasta_blank_line():
-    moti = Motifind()
-    path = "testdata/fasta_blank_line.fsa"
+    # Verify that blank lines in the file do not break parsing
+    moti = MotiFind(None, None, None)
 
-    headers, sequences = moti.FastaRead(path)
+    headers, sequences = moti.FastaRead(get_path("fasta_blank_line.fsa"))
 
     assert len(headers) == len(sequences)
 
 
 def test_fasta_long_seq():
-    moti = Motifind()
-    path = "testdata/fasta_long_seq.fsa"
+    # Verify that long sequences are read correctly
+    moti = MotiFind(None, None, None)
 
-    headers, sequences = moti.FastaRead(path)
+    headers, sequences = moti.FastaRead(get_path("fasta_long_seq.fsa"))
 
     assert len(headers) == len(sequences)
     assert len(sequences[0]) > 0
 
 
 def test_fasta_multiline():
-    moti = Motifind()
-    path = "testdata/fasta_multiline.fsa"
+    # Verify that sequences split across multiple lines are combined correctly
+    moti = MotiFind(None, None, None)
 
-    headers, sequences = moti.FastaRead(path)
+    headers, sequences = moti.FastaRead(get_path("fasta_multiline.fsa"))
 
     assert len(headers) == len(sequences)
 
 
 def test_fasta_missing_file():
-    moti = Motifind()
+    # Verify that a missing file raises FileNotFoundError
+    moti = MotiFind(None, None, None)
 
     with pytest.raises(FileNotFoundError):
-        moti.FastaRead("testdata/does_not_exist.fsa")
+        moti.FastaRead(get_path("does_not_exist.fsa"))
