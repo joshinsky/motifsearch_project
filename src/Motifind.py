@@ -31,16 +31,24 @@ class MotiFind:
     # Reads a fasta file and returns two lists: headers and sequences
     def FastaRead(self, fasta_filename=None):
 
-        if fasta_filename == None:
+        if fasta_filename is None:
             filename = self.fasta_name
         else:
             filename = fasta_filename
+
+
+        if filename is None:
+            raise ValueError("No FASTA filename provided.")
 
         # Check if the file exists
         if not os.path.exists(filename):
             raise FileNotFoundError(f"The file {filename} does not exist.")
         
+        self.headers = []
+        self.sequences = [] 
+
         current_seq = []   # Temporary storage for sequence lines
+
         try:
             with open(filename, 'r') as f:
                 for line in f:
@@ -74,7 +82,7 @@ class MotiFind:
             return self.headers, self.sequences
 
         # Error handling for unexpected issues
-        except Exception as e:
+        except OSError as e:
             raise IOError(f"Error reading FASTA file: {e}")
 
 
