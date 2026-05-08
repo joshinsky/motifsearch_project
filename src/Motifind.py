@@ -114,6 +114,7 @@ class MotiFind:
                     parts = line.split('\t')
                     if len(parts) < 2:
                         raise IndexError(f"\n\nERROR IN LINE {i} of {filename}: Missing second column:\nexpected:\t[letter, penalty]\ngiven:\t{line}\n")
+                    parts = [part.strip() for part in parts]
 
                     # Gap case
                     if parts[0] == '*':
@@ -165,7 +166,6 @@ class MotiFind:
                         motif_entry = (entry_type, motif_chars, penalty)
                     
                     self.motif.append(motif_entry)
-
             return self.motif
 
         # Error handling for unexpected issues

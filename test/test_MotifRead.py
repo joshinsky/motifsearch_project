@@ -29,7 +29,7 @@ TESTDATA = Path(__file__).resolve().parents[1] / "testdata"
 	(TESTDATA / "motif_penalties_zero.txt", 		[('char', {'T'}, 0.0), ('char', {'T'}, 0.0), ('char', {'G'}, 0.0), ('char', {'A'}, 0.0), ('char', {'C'}, 0.0), ('char', {'A'}, 0.0), ('gap', 2, 2), ('char', {'T'}, 0.0), ('char', {'A'}, 0.0), ('char', {'T'}, 0.0), ('char', {'A'}, 0.0), ('char', {'T', 'A'}, 0.0), ('char', {'T'}, 0.0)]),
 	(TESTDATA / "motif_random_linebreaks.txt", 		IndexError),
 	(TESTDATA / "motif_space_separated.txt", 		IndexError),
-	(TESTDATA / "motif_space_then_tab.txt", 		[('char', {'G'}, 10.0), ('char', {'*'}, 4.0), ('char', {'G'}, 10.0), ('char', {'K'}, 10.0), ('char', {'T', 'S'}, 10.0)]),
+	(TESTDATA / "motif_space_then_tab.txt", 		[('char', {'G'}, 10.0), ('gap', 4, 4), ('char', {'G'}, 10.0), ('char', {'K'}, 10.0), ('char', {'T', 'S'}, 10.0)]),
 	(TESTDATA / "motif_starts_with_gap.txt", 		[('gap', 15, 21), ('char', {'T'}, 8.0), ('char', {'A'}, 8.0), ('char', {'T'}, 6.0), ('char', {'A'}, 6.0), ('char', {'T', 'A'}, 5.0), ('char', {'T'}, 8.0)]),
 	(TESTDATA / "motif_strange_motif.txt", 			[('char', {'c', 'h', 'I'}, 4.0), ('char', {'n', 'B', 'i'}, 3.0), ('char', {'n', 'E', 'i'}, 4.0), ('char', {'M', 'i', 'o', 'v', 't'}, 2.0), ('char', {'F', 'r', 'ü'}, 2.0), ('char', {'e', 'n', 'E', 'i'}, 2.0), ('char', {'a', 'g', 'M', 'n', 'i', 'o', 's', 'r', 'k', 'm', 'u'}, 1.0), ('char', {'f', 'H', 'i', '!', 'l', 'e'}, 3.0)]),
 	(TESTDATA / "motif_two_following_gaps.txt", 	[('char', {'G'}, 10.0), ('gap', 4, 4), ('gap', 5, 5), ('char', {'G'}, 10.0), ('char', {'K'}, 10.0), ('char', {'T', 'S'}, 10.0)]),
