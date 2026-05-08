@@ -17,8 +17,8 @@ def test_scanseq_simple_match():
 
     # simple motif: A then C
     mf.motif = [
-        ('char', {'A'}, 0),
-        ('char', {'C'}, 0)
+        ('char', {'A'}, 6),
+        ('char', {'C'}, 6)
     ]
 
     # run scan
@@ -29,7 +29,7 @@ def test_scanseq_simple_match():
 
     # expected matches
     expected = [
-        (2, 4, 1.0),
+        (3, 5, 1.0),
         (6, 8, 1.0)
     ]
 
@@ -69,7 +69,7 @@ def test_motif_longer_than_seq():
 
     # should not find any matches
     mf.ScanFastaForMotif()
-    assert len(mf.all_matches) == 0
+    assert mf.all_matches == {"test_seq": ["NO MATCHES FOUND."]}
 
 
 def test_maxpen_missing():
@@ -133,7 +133,7 @@ def test_empty_rawseq():
 
     # should not find three matches
     mf.ScanSeqForMotif(input_sequence=testseq, head="test_empty_seq")
-    assert len(mf.all_matches) == 0
+    assert mf.all_matches == {"test_empty_seq": ["NO MATCHES FOUND."]}
 
 
 def test_gaps():
@@ -153,7 +153,7 @@ def test_gaps():
 
     # should not find three matches
     mf.ScanSeqForMotif(input_sequence=testseq, head="test_gaps")
-    assert len(mf.all_matches) == 6
+    assert len(mf.all_matches["test_gaps"]) == 6
 
 
 def test_rawseq_simple_match():
@@ -165,8 +165,8 @@ def test_rawseq_simple_match():
     
     # simple motif: C then A
     mf.motif = [
-        ('char', {'C'}, 0),
-        ('char', {'A'}, 0)
+        ('char', {'C'}, 6),
+        ('char', {'A'}, 6)
     ]
     
     # run scan
@@ -205,8 +205,8 @@ def test_no_match_found():
 
     # motif that cannot occur
     mf.motif = [
-        ('char', {'C'}, 0),
-        ('char', {'G'}, 0)
+        ('char', {'C'}, 6),
+        ('char', {'G'}, 6)
     ]
 
     # run scan
@@ -242,13 +242,13 @@ def test_penalty_threshold():
     assert "test_seq" in mf.all_matches
 
     # expected match
-    expected = (0, 4, 0.0)
+    expected = [(0, 4, 0.0), (1, 5, 0.0), (2, 6, 0.33), (3, 7, 1.0), (4, 8, 0.0), (5, 9, 0.0)]
 
     # check exactly one match was found
-    assert len(mf.all_matches["test_seq"]) == 1
+    assert len(mf.all_matches["test_seq"]) == 6
 
     # compare result
-    assert mf.all_matches["test_seq"][0] == expected
+    assert mf.all_matches["test_seq"] == expected
 
 
 def test_penalty_exceeds_threshold():
@@ -261,10 +261,10 @@ def test_penalty_exceeds_threshold():
 
     # motif with total mismatch penalty = 3
     mf.motif = [
-        ('char', {'A'}, 0),
-        ('char', {'C'}, 1),
-        ('char', {'G'}, 0),
-        ('char', {'T'}, 2)
+        ('char', {'A'}, 5),
+        ('char', {'C'}, 5),
+        ('char', {'G'}, 5),
+        ('char', {'T'}, 5)
     ]
 
     # run scan

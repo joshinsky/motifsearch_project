@@ -5,9 +5,12 @@ import sys
 
 class MotiFind:
 
-    def __init__(self, fasta_name, motif_name, max_penalty):
+    def __init__(self, fasta_name=None, motif_name=None, max_penalty=0):
         self.fasta_name = fasta_name
         self.motif_name = motif_name
+
+        if not isinstance(max_penalty, (int, float)):
+            raise TypeError(f"max_penalty should be given as integer or float. {type(max_penalty)} was given (max_penalty={max_penalty})")
         self.max_penalty = max_penalty
 
         self.sequences = []
