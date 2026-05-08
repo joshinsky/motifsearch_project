@@ -69,7 +69,7 @@ def test_motif_longer_than_seq():
 def test_maxpen_missing():
 
     # create object without files and omitting max penalty
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
             mf = MotiFind(None, None)
 
 
@@ -87,7 +87,7 @@ def test_maxpen_no_int():
 
     testseq = "AAAAA"
 
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         mf.ScanSeqForMotif(input_sequence=testseq)
 
             
