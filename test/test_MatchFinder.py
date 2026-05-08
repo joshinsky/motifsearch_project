@@ -40,6 +40,122 @@ def test_scanseq_simple_match():
     assert set(mf.all_matches["test_seq"]) == set(expected)
 
 
+def test_no_seq_no_motif():
+    # create object without files
+    mf = MotiFind(None, None, max_penalty=0)
+    mf.ScanFastaForMotif()
+
+    # should not find any matches
+    assert len(mf.all_matches) == 0
+
+
+def test_motif_longer_than_seq():
+
+    # create object without files
+    mf = MotiFind(None, None, max_penalty=0)
+
+    # manually defined FASTA-like data
+    mf.headers = ["test_seq"]
+    mf.sequences = ["AAA"]
+
+    # motif longer than sequence
+    mf.motif = [
+        ('char', {'A'}, 0),
+        ('char', {'A'}, 0),
+        ('char', {'A'}, 0),
+        ('char', {'A'}, 0),
+        ('char', {'A'}, 0)
+    ]
+
+    # should not find any matches
+    mf.ScanFastaForMotif()
+    assert len(mf.all_matches) == 0
+
+
+def test_maxpen_missing():
+
+    # create object without files and omitting max penalty
+    with pytest.raises(ValueError):
+            mf = MotiFind(None, None)
+
+
+def test_maxpen_no_int():
+
+    # create object without files and max penalty as int
+    mf = MotiFind(None, None, max_penalty="two")
+
+    # simple motif
+    mf.motif = [
+        ('char', {'A'}, 5),
+        ('char', {'A'}, 5),
+        ('char', {'A'}, 5)
+    ]
+
+    testseq = "AAAAA"
+
+    with pytest.raises(ValueError):
+        mf.ScanSeqForMotif(input_sequence=testseq)
+
+            
+
+def test_rawseq_but_no_header():
+
+    # create object without files
+    mf = MotiFind(None, None, max_penalty=0)
+
+    # simple motif
+    mf.motif = [
+        ('char', {'A'}, 5),
+        ('char', {'A'}, 5),
+        ('char', {'A'}, 5)
+    ]
+
+    testseq = "AAAAA"
+
+    # should not find three matches
+    mf.ScanSeqForMotif(input_sequence=testseq)
+    assert len(mf.all_matches) == 3
+
+
+def test_empty_rawseq():
+
+    # create object without files
+    mf = MotiFind(None, None, max_penalty=0)
+
+    # simple motif
+    mf.motif = [
+        ('char', {'A'}, 5),
+        ('char', {'A'}, 5),
+        ('char', {'A'}, 5)
+    ]
+
+    testseq = ""
+
+    # should not find three matches
+    mf.ScanSeqForMotif(input_sequence=testseq, head="test_empty_seq")
+    assert len(mf.all_matches) == 0
+
+
+def test_gaps():
+
+    # create object without files
+    mf = MotiFind(None, None, max_penalty=0)
+
+    # simple motif
+    mf.motif = [
+        ('char', {'A'}, 5),
+        ('gap', 0, 2),
+        ('char', {'A'}, 5),
+        ('char', {'A'}, 5)
+    ]
+
+    testseq = "AAAAA"
+
+    # should not find three matches
+    mf.ScanSeqForMotif(input_sequence=testseq, head="test_gaps")
+    assert len(mf.all_matches) == 6
+
+
 def test_rawseq_simple_match():
     # create object without files
     mf = MotiFind(None, None, max_penalty=5)
