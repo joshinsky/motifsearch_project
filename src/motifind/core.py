@@ -277,15 +277,15 @@ class MotiFind:
             start_penalty = 0
             matches = self.MatchFinder(seq, start_idx, motif_idx, start_penalty)
 
-            # store any matches found in a dict {head: [(startidx1, stopidx1, confidence1), ...]}
+            # store any matches found in a dict {head: [(startidx1, stopidx1, quality1), ...]}
             for match in matches:
                 stop_idx = match[0]
                 final_penalty = match[1]
                 if self.max_penalty != 0:
-                    confidence_score = 1 - final_penalty/self.max_penalty
+                    quality_score = 1 - final_penalty/self.max_penalty
                 else:
-                    confidence_score = 1
-                self.all_matches[head].append((start_idx, stop_idx, float(f"{confidence_score:.2f}")))
+                    quality_score = 1
+                self.all_matches[head].append((start_idx, stop_idx, float(f"{quality_score:.2f}")))
 
         # take note of each entry that didn't yield matches
         if not self.all_matches[head]:
