@@ -23,7 +23,9 @@ if __name__ == "__main__":
 	## Scan of targeted seq ##
 	##########################
 
-	print("\nCASE 1 - scan of only one sequence in the fasta file")
+	print("\nCASE 1 - scan of only one sequence")
+
+	print("Option A - index a specific FASTA entry")
 
 	# option A: in this example we're only interested in the first fasta entry
 	mf1 = MotiFind(fasta_filename, motif_filename, max_penalty)
@@ -38,22 +40,25 @@ if __name__ == "__main__":
 	mf1.ReturnMatches()			# 2. return the results
 	mf1.SaveMatches(outfileA)	# 3. save them to disk
 
-	input("\n\npress enter to continue to option B")
+	input("\n\npress enter to continue to CASE 1 (option B)")
     
     
-    # option B: in this example we're only interested in a raw sequence string
-    print("\nOption B - scanning a raw sequence string")
-     
-    raw_seq = "ATGCATGCATGC"
-    mf2 = MotiFind(fasta_filename, motif_filename, max_penalty)
-    mf2.ScanSeqForMotif(input_sequence=raw_seq, head="Testing_sequence")
+	# option B: in this example we're only interested in a raw sequence string
+	print("\n\n\nOption B - scanning a raw sequence string")
+
+	# raw_seq = "ATGCATGCATGC"
+	raw_seq = input("enter a DNA sequence you'd like to scan for the motif:")
+	mf2 = MotiFind(motif_name=motif_filename, max_penalty=max_penalty)
+	seq_name = input("now give your sequence a name/header:")
+	mf2.ScanSeqForMotif(input_sequence=raw_seq, head=seq_name)
     
-    outfileB = "results/output_demo_B.tsv"
-    matches = mf2.all_matches
-    mf2.ReturnMatches()
-    mf2.SaveMatches(outfileB)
+	outfileB = "results/output_demo_B.tsv"
+	matches = mf2.all_matches
+	print("Results:\n")
+	mf2.ReturnMatches()
+	mf2.SaveMatches(outfileB)
     
-    input("\n\npress to continue to case 2")
+	input("\n\npress to continue to case 2")
 
 	##########################
 	##       CASE 2:        ##
@@ -61,7 +66,7 @@ if __name__ == "__main__":
 	##   of the Full FASTA  ##
 	##########################
 
-	print("\nCASE 2 - scan a whole fasta file with the possibility to interact with the program")
+	print("\n\n\nCASE 2 - scan a whole fasta file with the possibility to interact with the program")
 
 	# in this example, we want to know all matches in the whole fasta file
 	mf3 = MotiFind(fasta_filename, motif_filename, max_penalty)
@@ -91,10 +96,12 @@ if __name__ == "__main__":
 		print(f"  {entry}")
 
 	# if you want to parse the fasta later
-	print("\nNow parsing the FASTA file after initialization...")
-	mf4.FastaRead(fasta_filename)
+	a = input("Do you want to parse the fasta file afterwards? Press enter to skip")
+	if a != '':
+		print("\nNow parsing the FASTA file after initialization...")
+		mf4.FastaRead(fasta_filename)
 
-	print(f"Successfully loaded {len(mf4.headers)} FASTA headers.")
+		print(f"Successfully loaded {len(mf4.headers)} FASTA headers.")
 
 
 	print("\n\nEnd of demo. Have a nice day!")

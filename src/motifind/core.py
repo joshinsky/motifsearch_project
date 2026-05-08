@@ -242,7 +242,7 @@ class MotiFind:
     ## Sequence Scan ##
     ###################
 
-    def ScanSeqForMotif(self, chosen_idx:int = None, input_sequence:str = None, head:str = None):
+    def ScanSeqForMotif(self, chosen_idx:int = None, input_sequence:str = None, head:str = "New input sequence"):
 
         # Enable inputting a sequence or an index
         if input_sequence is not None and chosen_idx is not None:
@@ -256,7 +256,6 @@ class MotiFind:
                 raise TypeError("input_sequence must be a string")
 
             seq = input_sequence
-            head = head or "input_sequence"
 
         else:
             if not isinstance(chosen_idx, int):
@@ -335,7 +334,7 @@ class MotiFind:
 
     def UserInteraction(self):
         user_prompt1 = f"""
-        \nProgram finished! How would you like to proceed?""" 
+        \nSearch finished! How would you like to proceed?""" 
         
         user_prompt2 = """
         Please select by typing one of the below numbers in the interface:
@@ -375,7 +374,12 @@ class MotiFind:
             # case: user wants to store the ouput on disk
             if user_answer in {'1', '2', '5', '6'}:
                 output_path = input("\nType the desired path for the file here:")
-                self.SaveMatches(output_path, matches_only=only_matches)
+                try:
+                    self.SaveMatches(output_path, matches_only=only_matches)
+                except FileNotFoundError:
+                    print("Some of the sub-directories don't exist. You should create them or try a different path.")
+                    continue
+
                 first_time = False
 
             # case: user doesn't want to do anything
