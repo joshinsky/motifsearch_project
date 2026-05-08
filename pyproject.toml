@@ -1,0 +1,10 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "motifind"
+version = "0.1.0"
+description = "Motif search tool for biological sequences"
+authors = [{name = "Joshua Lembeck and Parastoo Tabibzadehtehrani"}]
+dependencies = []

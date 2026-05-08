@@ -1,15 +1,11 @@
 import pytest
-import sys
-import os
+import os 
 
-# Ensure the src directory is available for imports
-sys.path.append(os.path.join(os.path.dirname(__file__), "../src"))
+from motifind import MotiFind
 
-from Motifind import MotiFind
-
-# Build absolute paths to test data files relative to this test file
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 DATA_DIR = os.path.join(BASE_DIR, "testdata")
+
 
 def get_path(filename):
     return os.path.join(DATA_DIR, filename)
