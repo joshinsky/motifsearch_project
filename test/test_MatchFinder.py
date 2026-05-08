@@ -69,28 +69,16 @@ def test_motif_longer_than_seq():
 def test_maxpen_missing():
 
     # create object without files and omitting max penalty
-    with pytest.raises(TypeError):
-            mf = MotiFind(None, None)
+    mf = MotiFind(None, None)
+    assert mf.max_penalty == 0
 
 
 def test_maxpen_no_int():
 
     # create object without files and max penalty as int
-    mf = MotiFind(None, None, max_penalty="two")
-
-    # simple motif
-    mf.motif = [
-        ('char', {'A'}, 5),
-        ('char', {'A'}, 5),
-        ('char', {'A'}, 5)
-    ]
-
-    testseq = "AAAAA"
-
     with pytest.raises(TypeError):
-        mf.ScanSeqForMotif(input_sequence=testseq)
-
-            
+        mf = MotiFind(None, None, max_penalty="two")
+    
 
 def test_rawseq_but_no_header():
 
@@ -106,9 +94,10 @@ def test_rawseq_but_no_header():
 
     testseq = "AAAAA"
 
-    # should not find three matches
+    # should have entry with default key and three matches
     mf.ScanSeqForMotif(input_sequence=testseq)
-    assert len(mf.all_matches) == 3
+    assert "New input sequence" in mf.all_matches.keys()
+    assert len(mf.all_matches["New input sequence"]) == 3
 
 
 def test_empty_rawseq():
