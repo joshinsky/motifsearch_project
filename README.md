@@ -33,14 +33,15 @@ You can run the built-in demonstration script from your terminal to see MotiFind
 
 ```bash
 # Run the automated bash pipeline
-./src/run_demo.sh
+./src/demo/run_demo.sh
 ```
 
 Alternatively, you can run the core Python script directly by passing your own FASTA file, motif definition file, maximum penalty threshold, and desired output path:
 
 ```bash
 # Direct python execution
-python3 src/demo2.py inputs/fastas/test_seqs.fsa inputs/motifs/test_motif.txt 15 results/my_results.txt
+mkdir results
+python3 src/demo/demo2.py inputs/fastas/test_seqs.fsa inputs/motifs/test_motif.txt 15 results/my_results.txt
 ```
 
 ### 3. Usage in Python
